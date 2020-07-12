@@ -1,3 +1,50 @@
+* spring源码环境配置
+1. 配置gradle环境（系统变量配置，设置仓库地址，最好和maven共用仓库）   
+2. 从github拉取spring源码至本地 
+3. 参考源码中《import-into-idea.md》文件内容。
+    将spring-aspects模块排除出去，在settings.gradle文件中注解掉
+    [include "spring-aspects"]
+4. 修改仓库地址，从国内的镜像仓库下载jar包，提高效率。
+    修改 build.gradle文件。
+
+    buildscript {
+        repositories {
+            mavenLocal()
+            maven { url "https://maven.aliyun.com/repository/spring-plugin" }
+            maven { url "https://maven.aliyun.com/nexus/content/repositories/spring-plugin" }
+            maven { url "https://repo.spring.io/plugins-release" }
+        }
+        dependencies {
+            classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
+            classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
+            classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
+            classpath("org.asciidoctor:asciidoctorj-epub3:1.5.0-alpha.7")
+        }
+    }
+
+    test {
+            systemProperty("java.awt.headless", "true")
+            systemProperty("testGroups", project.properties.get("testGroups"))
+            scanForTestClasses = false
+            include(["**/*Tests.class", "**/*Test.class"])
+            // Since we set scanForTestClasses to false, we need to filter out inner
+            // classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
+            // run MyTests by itself will fail if MyTests contains any inner classes.
+            exclude(["**/Abstract*.class", '**/*$*'])
+            reports.junitXml.setDestination(file("$buildDir/test-results"))
+        }
+
+    repositories {
+         mavenLocal()
+         maven { url "https://maven.aliyun.com/repository/central" }
+             maven { url "https://repo.spring.io/libs-release" }
+    }
+
+5. 打开源码文件夹，进入cmd.。执行gradlew :spring-oxm:compileTestJava命令。
+    构建成功后，按照步骤Import into IntelliJ (File -> New -> Project from Existing Sources -> Navigate to directory -> Select build.gradle)
+    成功将源项目导入idea中。
+    
+
 # <img src="src/docs/asciidoc/images/spring-framework.png" width="80" height="80"> Spring Framework
 
 This is the home of the Spring Framework, the foundation for all

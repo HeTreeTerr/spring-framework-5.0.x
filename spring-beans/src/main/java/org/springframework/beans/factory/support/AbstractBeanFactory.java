@@ -239,11 +239,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
-
+		//理解验证bean的名字是否非法
 		String beanName = transformedBeanName(name);
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		/**
+		 * 以上是循环依赖的整个过程，其中getSingleton(beanName)
+		 * 这个方法的存在至关重要
+		 * 最后，getSingleton(beanName)的源码分析，下文会分析
+		 */
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isDebugEnabled()) {
@@ -315,6 +320,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							//完成了目标对象的创建
+							//如果需要代理，还完成了代理
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
