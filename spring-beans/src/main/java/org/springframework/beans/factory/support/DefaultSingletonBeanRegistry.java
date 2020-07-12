@@ -182,11 +182,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				//不存在于三级缓存中
 				if (singletonObject == null && allowEarlyReference) {
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+					//存在于bean工厂（二级缓存）
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
+						//放入三级缓存中
 						this.earlySingletonObjects.put(beanName, singletonObject);
+						//从工厂中清除
 						this.singletonFactories.remove(beanName);
 					}
 				}
